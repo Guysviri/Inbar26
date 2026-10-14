@@ -226,7 +226,7 @@ button{font:inherit;color:inherit}
 .cup{transition:transform .6s cubic-bezier(.2,1.7,.5,1) var(--cd,0s),opacity .3s var(--cd,0s)}
 .choco-lid.shake{animation:wiggle 3.5s ease-in-out infinite}
 .choco-note{margin-top:14px;text-align:center;font-family:var(--hand);font-size:26px;color:#EAD7C3}
-dialog#note{border:0;padding:0;background:transparent;max-width:min(92vw,420px);width:100%}
+dialog#note{border:0;padding:0;background:transparent;max-width:min(92vw,420px);width:100%;max-height:86vh;max-height:86dvh;overflow-y:auto;-webkit-overflow-scrolling:touch;overscroll-behavior:contain}
 dialog#note::backdrop{background:rgba(43,24,16,.55);-webkit-backdrop-filter:blur(3px);backdrop-filter:blur(3px)}
 .note-card{background:var(--paper-2);border-radius:6px;padding:26px 22px 20px;box-shadow:0 30px 60px -20px rgba(0,0,0,.5);border-top:10px solid var(--rose);animation:pop .45s cubic-bezier(.2,1.5,.5,1)}
 .note-card p{font-size:20px;line-height:1.55;white-space:pre-line}
@@ -568,7 +568,7 @@ dialog#note::backdrop{background:rgba(43,24,16,.55);-webkit-backdrop-filter:blur
       <div class="choco-grid" id="chocoGrid"></div>
       <p class="choco-note" id="chocoNote">לגעת בכדור כדי לפתוח</p>
     </div>
-    <dialog id="note"><div class="note-card"><p id="noteText"></p><p class="from" id="noteFrom"></p><button type="button" id="noteClose">לסגור ולקחת עוד אחד</button></div></dialog>
+    <dialog id="note"><div class="note-card" tabindex="-1" autofocus style="outline:none"><p id="noteText"></p><p class="from" id="noteFrom"></p><button type="button" id="noteClose">לסגור ולקחת עוד אחד</button></div></dialog>
   </section>
 
   <!-- Cake -->
@@ -1128,6 +1128,11 @@ dialog#note::backdrop{background:rgba(43,24,16,.55);-webkit-backdrop-filter:blur
       $('#noteFrom').textContent = g ? g.from : 'גיא';
       const dlg = $('#note');
       if (dlg.showModal) dlg.showModal(); else dlg.setAttribute('open', '');
+      // long wishes must open at their first line, not at the close button
+      const card = dlg.querySelector('.note-card');
+      card.focus({ preventScroll: true });
+      dlg.scrollTop = 0;
+      requestAnimationFrame(() => { dlg.scrollTop = 0; });
     });
     grid.appendChild(b);
   });
