@@ -226,7 +226,12 @@ button{font:inherit;color:inherit}
 .cup{transition:transform .6s cubic-bezier(.2,1.7,.5,1) var(--cd,0s),opacity .3s var(--cd,0s)}
 .choco-lid.shake{animation:wiggle 3.5s ease-in-out infinite}
 .choco-note{margin-top:14px;text-align:center;font-family:var(--hand);font-size:26px;color:#EAD7C3}
-dialog#note{border:0;padding:0;background:transparent;max-width:min(92vw,420px);width:100%;max-height:86vh;max-height:86dvh;overflow-y:auto;-webkit-overflow-scrolling:touch;overscroll-behavior:contain}
+dialog#note{border:0;padding:0;background:transparent;max-width:min(92vw,420px);width:100%;max-height:86vh;max-height:86dvh;overflow:hidden}
+/* the card never scrolls as a whole: only the wish text scrolls, so the close button is always on screen and nothing pulls the view to the end */
+dialog#note .note-card{display:flex;flex-direction:column;max-height:86vh;max-height:86dvh;box-sizing:border-box}
+dialog#note #noteText{flex:1 1 auto;min-height:0;overflow-y:auto;-webkit-overflow-scrolling:touch;overscroll-behavior:contain}
+dialog#note .from,dialog#note button{flex:none}
+dialog#note #noteText.more{-webkit-mask-image:linear-gradient(#000 calc(100% - 36px),transparent);mask-image:linear-gradient(#000 calc(100% - 36px),transparent)}
 dialog#note::backdrop{background:rgba(43,24,16,.55);-webkit-backdrop-filter:blur(3px);backdrop-filter:blur(3px)}
 .note-card{background:var(--paper-2);border-radius:6px;padding:26px 22px 20px;box-shadow:0 30px 60px -20px rgba(0,0,0,.5);border-top:10px solid var(--rose);animation:pop .45s cubic-bezier(.2,1.5,.5,1)}
 .note-card p{font-size:20px;line-height:1.55;white-space:pre-line}
@@ -1124,15 +1129,17 @@ dialog#note::backdrop{background:rgba(43,24,16,.55);-webkit-backdrop-filter:blur
     b.innerHTML = `<span class="truffle t${i % 5}"></span>`;
     b.addEventListener('click', () => {
       b.classList.add('eaten');
+      $('#noteText').scrollTop = 0;
       $('#noteText').textContent = g ? g.text : 'הברכה הזו עוד באפייה.\nבינתיים: מזל טוב, יפה שלי.';
       $('#noteFrom').textContent = g ? g.from : 'גיא';
       const dlg = $('#note');
       if (dlg.showModal) dlg.showModal(); else dlg.setAttribute('open', '');
       // long wishes must open at their first line, not at the close button
-      const card = dlg.querySelector('.note-card');
+      const card = dlg.querySelector('.note-card'), txt = $('#noteText');
       card.focus({ preventScroll: true });
-      dlg.scrollTop = 0;
-      requestAnimationFrame(() => { dlg.scrollTop = 0; });
+      const top = () => { txt.scrollTop = 0; dlg.scrollTop = 0; txt.classList.toggle('more', txt.scrollHeight > txt.clientHeight + 4); };
+      txt.onscroll = () => txt.classList.toggle('more', txt.scrollTop + txt.clientHeight < txt.scrollHeight - 4);
+      top(); requestAnimationFrame(top); setTimeout(top, 60); setTimeout(top, 480);
     });
     grid.appendChild(b);
   });
